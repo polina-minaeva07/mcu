@@ -5,21 +5,24 @@ set(PICO_PLATFORM rp2040)
 
 include(pico_sdk_import.cmake)
 
-project(03_adc)
+project(04_bme)
 
 pico_sdk_init()
+
+add_subdirectory("../libs/protocol" "${PROJECT_BINARY_DIR}/protocol")
+add_subdirectory("../libs/bme280-driver" "${PROJECT_BINARY_DIR}/bme280-driver")
 
 add_executable(${PROJECT_NAME}
 	${CMAKE_CURRENT_SOURCE_DIR}/main.c
 	${CMAKE_CURRENT_SOURCE_DIR}/stdio-task/stdio-task.c
-	${CMAKE_CURRENT_SOURCE_DIR}/protocol-task/protocol-task.c
 	${CMAKE_CURRENT_SOURCE_DIR}/led-task/led-task.c
-	${CMAKE_CURRENT_SOURCE_DIR}/adc-task/adc-task.c
 )
 
 target_link_libraries(${PROJECT_NAME}
 	pico_stdlib
-	hardware_adc
+	protocol
+	bme280_driver
+	hardware_i2c
 )
 
 pico_set_linker_script(${PROJECT_NAME} ${CMAKE_CURRENT_SOURCE_DIR}/memmap_rp2040.ld)

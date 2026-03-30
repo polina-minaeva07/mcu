@@ -63,10 +63,26 @@ void wmem_callback(const char* args)
     printf("The value '0x%x' is written at the address '0x%x'\n", value, address);
 }
 
-void get_adc_callback()
+void get_adc_callback(const char* args)
 {
-    float voltage_V = get_adc();
+    float voltage_V = adc_task_read_voltage();
     printf("%f\n", voltage_V);
+}
+void get_temp_callback(const char* args)
+{
+    float temp_C = adc_task_read_temperature();
+    printf("%f\n", temp_C);
+}
+
+void tm_start_callback(const char* args)
+{
+    adc_task_set_state(ADC_TASK_STATE_RUN);
+    printf("Measure started\n");
+}
+void tm_stop_callback(const char* args)
+{
+    adc_task_set_state(ADC_TASK_STATE_IDLE);
+    printf("Measure stopped\n");
 }
 
 api_t device_api[] =
@@ -80,6 +96,9 @@ api_t device_api[] =
     {"wmem", wmem_callback, "write in memory"},
     {"help", help_callback, "print commands description"},
     {"get_adc", get_adc_callback, "outputs the voltage on the pin"},
+    {"get_temp", get_temp_callback, "outputs the measured temperature"},
+    {"tm_start", tm_start_callback, "the beginning of voltage and temperature measurements"},
+    {"tm_stop", tm_stop_callback, "end of voltage and temperature measurements"},
 	{NULL, NULL, NULL},
 };
 
@@ -89,10 +108,12 @@ int main()
     stdio_task_init();
     protocol_task_init(device_api);
     led_task_init();
+    adc_task_init();
 
     while (1)
     {
         protocol_task_handle(stdio_task_handle());
         led_task_handle();
+        adc_task_handle();
     }
 }
